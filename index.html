@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader Pro</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --error: #ef4444;
+            --success: #22c55e;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background-image: radial-gradient(circle at top right, #1e1b4b 0%, var(--bg-color) 40%);
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), #ec4899);
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background-color: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="url"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .radio-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .radio-option input {
+            display: none;
+        }
+
+        .radio-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background-color: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .radio-option input:checked + .radio-card {
+            border-color: var(--primary);
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .radio-option input:hover + .radio-card {
+            border-color: #475569;
+        }
+
+        .radio-option input:checked:hover + .radio-card {
+            border-color: var(--primary);
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        button {
+            width: 100%;
+            padding: 1.25rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background-color: #475569;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.7;
+        }
+
+        .loader {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            display: none;
+            white-space: pre-wrap;
+            word-break: break-all;
+            background-color: #0f172a;
+            border: 1px solid var(--border);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar for terminal output */
+        #result::-webkit-scrollbar {
+            width: 8px;
+        }
+        #result::-webkit-scrollbar-track {
+            background: #0f172a;
+            border-radius: 4px;
+        }
+        #result::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        #result::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        .success {
+            border-left: 4px solid var(--success) !important;
+        }
+
+        .error {
+            border-left: 4px solid var(--error) !important;
+            color: #fca5a5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Video Downloader Pro</h1>
+        <p class="subtitle">Fast, secure downloading via yt-dlp</p>
+
+        <form id="downloadForm">
+            <div class="form-group">
+                <label for="url">Video URL</label>
+                <input type="url" id="url" placeholder="https://www.youtube.com/watch?v=..." required>
+            </div>
+
+            <div class="form-group">
+                <label>Operating System (Binary)</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="os" value="windows" checked>
+                        <div class="radio-card">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M0 3.449L9.75 2.1v9.428H0V3.449zM10.25 2.036L24 0v11.528H10.25V2.036zM0 12.472h9.75v9.428L0 20.551v-8.079zM10.25 12.472H24V24l-13.75-2.036v-9.492z"/>
+                            </svg>
+                            Windows
+                        </div>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="os" value="linux">
+                        <div class="radio-card">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M11.97 0C5.694 0 .545 4.883.545 11.233c0 6.634 5.617 12.767 11.425 12.767 6.132 0 11.485-5.594 11.485-12.767C23.455 4.966 18.2 0 11.97 0zM7.5 16.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zm9 0c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                            Linux
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <span id="btnText">Start Download</span>
+                <div class="loader" id="loader"></div>
+            </button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('downloadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const urlInput = document.getElementById('url').value;
+            const osInput = document.querySelector('input[name="os"]:checked').value;
+            
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            const resultDiv = document.getElementById('result');
+
+            // UI Loading state
+            btn.disabled = true;
+            btnText.textContent = 'Downloading...';
+            loader.style.display = 'block';
+            resultDiv.style.display = 'none';
+            resultDiv.className = '';
+            
+            try {
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        url: urlInput,
+                        binary: osInput
+                    })
+                });
+
+                const contentType = response.headers.get('Content-Type');
+                
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    
+                    resultDiv.style.display = 'block';
+                    
+                    if (response.ok) {
+                        resultDiv.classList.add('success');
+                        resultDiv.textContent = `✅ Success: ${data.message}\n\nTerminal Output:\n${data.output}`;
+                    } else {
+                        resultDiv.classList.add('error');
+                        resultDiv.textContent = `❌ Error: ${data.error || 'Unknown error occurred'}\n\nTerminal Output:\n${data.output || ''}`;
+                    }
+                } else if (response.ok) {
+                    // It's a file stream
+                    const blob = await response.blob();
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = 'video.mp4';
+                    if (contentDisposition && contentDisposition.includes('filename=')) {
+                        filename = contentDisposition.split('filename=')[1].replace(/"/g, '');
+                    }
+                    
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = downloadUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(downloadUrl);
+                    
+                    resultDiv.style.display = 'block';
+                    resultDiv.classList.add('success');
+                    resultDiv.textContent = `✅ Success: Video downloaded to your device!`;
+                } else {
+                    resultDiv.style.display = 'block';
+                    resultDiv.classList.add('error');
+                    resultDiv.textContent = `❌ Error: Unknown response format`;
+                }
+
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.classList.add('error');
+                resultDiv.textContent = `❌ Network Error: Could not connect to the server.\nDetails: ${error.message}`;
+            } finally {
+                // UI Reset state
+                btn.disabled = false;
+                btnText.textContent = 'Start Download';
+                loader.style.display = 'none';
+                
+                // Keep scroll at bottom of output
+                resultDiv.scrollTop = resultDiv.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
