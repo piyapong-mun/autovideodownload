@@ -1,21 +1,24 @@
-# 1. Start with a Python environment
-FROM golang:1.25.6
+# Use a valid stable Go version
+FROM golang:1.24-alpine
 
-# 2. Set the folder for our app
+# Install git (often needed for fetching go modules)
+RUN apk add --no-cache git
+
 WORKDIR /app
 
-# 3. Copy our code into that folder
+# Copy go.mod and go.sum first to leverage Docker caching
+COPY go.mod go.sum* ./
+RUN go mod download
+
+# Copy the rest of the source code
 COPY . .
 
-# 4. Init go mod
-RUN go mod init github.com/piyapong-mun/autovideodownload
+# Build the application into a binary named 'server'
+RUN go build -o server main.go
 
-# 5. Install dependencies
-RUN go mod tidy
-
-# Expose port
+# Expose the port (informative only)
 EXPOSE 1112
 
-# 5. Tell the container how to start the app
-CMD ["go", "run", "main.go"]
-
+# Run the compiled binary
+# We use 'sh -c' to ensure environment variables like $PORT are handled if needed
+CMD ["./server"]
