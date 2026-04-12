@@ -10,5 +10,9 @@ COPY . .
 # 4. Install dependencies
 RUN go mod tidy
 
+# Expose port
+EXPOSE 1112
+
 # 5. Tell the container how to start the app
 CMD ["go", "run", "main.go"]
+
