@@ -125,6 +125,34 @@ func main() {
 		http.ServeFile(w, r, "index.html")
 	})
 
+	// List Files
+	http.HandleFunc("/api/list", func(w http.ResponseWriter, r *http.Request) {
+		if !isValidSession(r) {
+			http.Error(w, "Unauthorized session", http.StatusUnauthorized)
+			return
+		}
+		cookie, _ := r.Cookie("session")
+		sessionID := cookie.Value
+
+		files_list, err_list := os.ReadDir("./video/" + sessionID)
+		if err_list != nil {
+			log.Printf("Failed to read directory: %v", err_list)
+			return
+		}
+
+		files := []string{}
+		for _, f := range files_list {
+			if !f.IsDir() {
+				files = append(files, f.Name())
+			}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(Response{
+			Files: files,
+		})
+	})
+
 	// Background Task
 	go func() {
 		for {
