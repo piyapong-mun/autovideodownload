@@ -15,6 +15,7 @@ COPY . .
 
 # Build the application into a binary named 'server'
 RUN go build -o server main.go
+RUN chmod +x server
 
 # Expose the port (informative only)
 EXPOSE 1112

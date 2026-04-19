@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -134,17 +135,17 @@
             font-weight: 500;
         }
 
-        .radio-option input:checked + .radio-card {
+        .radio-option input:checked+.radio-card {
             border-color: var(--primary);
             background-color: rgba(99, 102, 241, 0.1);
             color: var(--primary);
         }
 
-        .radio-option input:hover + .radio-card {
+        .radio-option input:hover+.radio-card {
             border-color: #475569;
         }
 
-        .radio-option input:checked:hover + .radio-card {
+        .radio-option input:checked:hover+.radio-card {
             border-color: var(--primary);
         }
 
@@ -193,14 +194,16 @@
             display: none;
             width: 24px;
             height: 24px;
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         #result {
@@ -222,14 +225,17 @@
         #result::-webkit-scrollbar {
             width: 8px;
         }
+
         #result::-webkit-scrollbar-track {
             background: #0f172a;
             border-radius: 4px;
         }
+
         #result::-webkit-scrollbar-thumb {
             background: #475569;
             border-radius: 4px;
         }
+
         #result::-webkit-scrollbar-thumb:hover {
             background: #64748b;
         }
@@ -244,10 +250,11 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
-        <h1>Video Downloader Pro</h1>
+        <h1>Video Downloader</h1>
         <p class="subtitle">Fast, secure downloading via yt-dlp</p>
 
         <form id="downloadForm">
@@ -259,7 +266,7 @@
             <div class="form-group">
                 <label>Operating System (Binary)</label>
                 <div class="radio-group">
-                    <label class="radio-option">
+                    <!-- <label class="radio-option">
                         <input type="radio" name="os" value="windows" checked>
                         <div class="radio-card">
                             <svg class="icon" viewBox="0 0 24 24">
@@ -267,12 +274,13 @@
                             </svg>
                             Windows
                         </div>
-                    </label>
+                    </label> -->
                     <label class="radio-option">
-                        <input type="radio" name="os" value="linux">
+                        <input type="radio" name="os" value="linux" checked>
                         <div class="radio-card">
                             <svg class="icon" viewBox="0 0 24 24">
-                                <path d="M11.97 0C5.694 0 .545 4.883.545 11.233c0 6.634 5.617 12.767 11.425 12.767 6.132 0 11.485-5.594 11.485-12.767C23.455 4.966 18.2 0 11.97 0zM7.5 16.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zm9 0c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                <path
+                                    d="M11.97 0C5.694 0 .545 4.883.545 11.233c0 6.634 5.617 12.767 11.425 12.767 6.132 0 11.485-5.594 11.485-12.767C23.455 4.966 18.2 0 11.97 0zM7.5 16.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zm9 0c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                             </svg>
                             Linux
                         </div>
@@ -281,21 +289,23 @@
             </div>
 
             <button type="submit" id="submitBtn">
-                <span id="btnText">Start Download</span>
+                <span id="btnText">Prepare File</span>
                 <div class="loader" id="loader"></div>
             </button>
         </form>
 
+
         <div id="result"></div>
+        <div id="filelist"></div>
     </div>
 
     <script>
         document.getElementById('downloadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const urlInput = document.getElementById('url').value;
             const osInput = document.querySelector('input[name="os"]:checked').value;
-            
+
             const btn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
             const loader = document.getElementById('loader');
@@ -307,7 +317,8 @@
             loader.style.display = 'block';
             resultDiv.style.display = 'none';
             resultDiv.className = '';
-            
+            document.getElementById('filelist').innerHTML = '';
+
             try {
                 const response = await fetch('/api/download', {
                     method: 'POST',
@@ -321,18 +332,40 @@
                 });
 
                 const contentType = response.headers.get('Content-Type');
-                
+
                 if (contentType && contentType.includes('application/json')) {
                     const data = await response.json();
-                    
+
                     resultDiv.style.display = 'block';
-                    
+
                     if (response.ok) {
                         resultDiv.classList.add('success');
-                        resultDiv.textContent = `✅ Success: ${data.message}\n\nTerminal Output:\n${data.output}`;
+                        resultDiv.textContent = `✅ Success: ${data.message}`;
+
+                        const fileListDiv = document.getElementById('filelist');
+                        fileListDiv.innerHTML = '';
+                        if (data.files && data.files.length > 0) {
+                            fileListDiv.innerHTML = "<h3 style='margin-top:20px;margin-bottom:15px;color:var(--text-main);'>Available Files:</h3>";
+                            data.files.forEach(file => {
+                                const btn = document.createElement('a');
+                                btn.href = `/api/file?name=${encodeURIComponent(file)}`;
+                                btn.download = file;
+                                btn.innerHTML = `<span style='word-break: break-all;'>${file}</span> <span style='background:var(--primary);padding:5px 10px;border-radius:5px;font-size:0.8rem;margin-left:15px;'>Download</span>`;
+                                btn.style = 'display: flex; align-items: center; justify-content: space-between; margin: 10px 0; padding: 15px 20px; background: var(--card-bg); border: 1px solid var(--border); color: white; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 1rem; transition: all 0.2s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);';
+                                btn.onmouseover = function () {
+                                    this.style.borderColor = 'var(--primary)';
+                                    this.style.transform = 'translateY(-2px)';
+                                };
+                                btn.onmouseout = function () {
+                                    this.style.borderColor = 'var(--border)';
+                                    this.style.transform = 'translateY(0)';
+                                };
+                                fileListDiv.appendChild(btn);
+                            });
+                        }
                     } else {
                         resultDiv.classList.add('error');
-                        resultDiv.textContent = `❌ Error: ${data.error || 'Unknown error occurred'}\n\nTerminal Output:\n${data.output || ''}`;
+                        resultDiv.textContent = `❌ Error: ${data.error || 'Download failed'}`;
                     }
                 } else if (response.ok) {
                     // It's a file stream
@@ -342,7 +375,7 @@
                     if (contentDisposition && contentDisposition.includes('filename=')) {
                         filename = contentDisposition.split('filename=')[1].replace(/"/g, '');
                     }
-                    
+
                     const downloadUrl = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.style.display = 'none';
@@ -351,7 +384,7 @@
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(downloadUrl);
-                    
+
                     resultDiv.style.display = 'block';
                     resultDiv.classList.add('success');
                     resultDiv.textContent = `✅ Success: Video downloaded to your device!`;
@@ -370,11 +403,14 @@
                 btn.disabled = false;
                 btnText.textContent = 'Start Download';
                 loader.style.display = 'none';
-                
+
                 // Keep scroll at bottom of output
                 resultDiv.scrollTop = resultDiv.scrollHeight;
             }
         });
+
+
     </script>
 </body>
+
 </html>
