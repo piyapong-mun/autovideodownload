@@ -16,6 +16,7 @@ COPY . .
 # Build the application into a binary named 'server'
 RUN go build -o server main.go
 RUN chmod +x server
+RUN chmod +x ./video/*
 
 # Expose the port (informative only)
 EXPOSE 1112

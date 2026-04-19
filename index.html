@@ -328,9 +328,11 @@
             }
         }
 
-        window.addEventListener('DOMContentLoaded', (event) => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', listFiles);
+        } else {
             listFiles();
-        });
+        }
     </script>
 
     <script>
