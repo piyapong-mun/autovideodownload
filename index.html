@@ -291,33 +291,46 @@
     </div>
     <script>
         async function listFiles() {
-            const response = await fetch('/api/list');
-            const data = await response.json();
-            const fileListDiv = document.getElementById('filelist');
-            fileListDiv.innerHTML = '';
-            
-            if (data.files && data.files.length > 0) {
-                fileListDiv.innerHTML = "<h3 style='margin-top:20px;margin-bottom:15px;color:var(--text-main);'>Available Files:</h3>";
-                data.files.forEach(file => {
-                    const btn = document.createElement('a');
-                    btn.href = `/api/file?name=${encodeURIComponent(file)}`;
-                    btn.download = file;
-                    btn.innerHTML = `<span style='word-break: break-all;'>${file}</span> <span style='background:var(--primary);padding:5px 10px;border-radius:5px;font-size:0.8rem;margin-left:15px;'>Download</span>`;
-                    btn.style = 'display: flex; align-items: center; justify-content: space-between; margin: 10px 0; padding: 15px 20px; background: var(--card-bg); border: 1px solid var(--border); color: white; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 1rem; transition: all 0.2s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);';
-                    btn.onmouseover = function () {
-                        this.style.borderColor = 'var(--primary)';
-                        this.style.transform = 'translateY(-2px)';
-                    };
-                    btn.onmouseout = function () {
-                        this.style.borderColor = 'var(--border)';
-                        this.style.transform = 'translateY(0)';
-                    };
-                    fileListDiv.appendChild(btn);
-                });
+            try {
+                console.log("Fetching files...");
+                const response = await fetch('/api/list');
+                const data = await response.json();
+                console.log("Data received:", data);
+
+                const fileListDiv = document.getElementById('filelist');
+                if (!fileListDiv) {
+                    console.error("Could not find filelist div!");
+                    return;
+                }
+                fileListDiv.innerHTML = '';
+                
+                if (data.files && data.files.length > 0) {
+                    fileListDiv.innerHTML = "<h3 style='margin-top:20px;margin-bottom:15px;color:var(--text-main);'>Available Files:</h3>";
+                    data.files.forEach(file => {
+                        const btn = document.createElement('a');
+                        btn.href = `/api/file?name=${encodeURIComponent(file)}`;
+                        btn.download = file;
+                        btn.innerHTML = `<span style='word-break: break-all;'>${file}</span> <span style='background:var(--primary);padding:5px 10px;border-radius:5px;font-size:0.8rem;margin-left:15px;'>Download</span>`;
+                        btn.style = 'display: flex; align-items: center; justify-content: space-between; margin: 10px 0; padding: 15px 20px; background: var(--card-bg); border: 1px solid var(--border); color: white; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 1rem; transition: all 0.2s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);';
+                        btn.onmouseover = function () {
+                            this.style.borderColor = 'var(--primary)';
+                            this.style.transform = 'translateY(-2px)';
+                        };
+                        btn.onmouseout = function () {
+                            this.style.borderColor = 'var(--border)';
+                            this.style.transform = 'translateY(0)';
+                        };
+                        fileListDiv.appendChild(btn);
+                    });
+                }
+            } catch (err) {
+                console.error("Error fetching files:", err);
             }
         }
 
-        listFiles();
+        window.addEventListener('DOMContentLoaded', (event) => {
+            listFiles();
+        });
     </script>
 
     <script>
