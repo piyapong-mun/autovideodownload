@@ -107,6 +107,12 @@ type Response struct {
 }
 
 func main() {
+	// Ensure yt-dlp is executable on startup
+	err := os.Chmod(filepath.Join(".", "video", "yt-dlp"), 0755)
+	if err != nil {
+		log.Printf("Warning: failed to chmod yt-dlp: %v", err)
+	}
+
 	initDB()
 	defer db.Close()
 
